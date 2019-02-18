@@ -59,13 +59,11 @@ public class PocketSphinxActivity extends Activity implements
 
     /* Named searches allow to quickly reconfigure the decoder */
     private static final String KWS_SEARCH = "wakeup";
-    private static final String FORECAST_SEARCH = "forecast";
+    private static final String OPTIONS_SEARCH = "options";
     private static final String DIGITS_SEARCH = "digits";
-    private static final String PHONE_SEARCH = "phones";
-    private static final String MENU_SEARCH = "menu";
 
     /* Keyword we are looking for to activate menu */
-    private static final String KEYPHRASE = "oh mighty computer";
+    private static final String KEYPHRASE = "start list";
 
     /* Used to handle permission request */
     private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
@@ -80,10 +78,8 @@ public class PocketSphinxActivity extends Activity implements
         // Prepare the data for UI
         captions = new HashMap<>();
         captions.put(KWS_SEARCH, R.string.kws_caption);
-        captions.put(MENU_SEARCH, R.string.menu_caption);
+        captions.put(OPTIONS_SEARCH, R.string.options_caption);
         captions.put(DIGITS_SEARCH, R.string.digits_caption);
-        captions.put(PHONE_SEARCH, R.string.phone_caption);
-        captions.put(FORECAST_SEARCH, R.string.forecast_caption);
         setContentView(R.layout.main);
         ((TextView) findViewById(R.id.caption_text))
                 .setText("Preparing the recognizer");
@@ -164,13 +160,7 @@ public class PocketSphinxActivity extends Activity implements
 
         String text = hypothesis.getHypstr();
         if (text.equals(KEYPHRASE))
-            switchSearch(MENU_SEARCH);
-        else if (text.equals(DIGITS_SEARCH))
-            switchSearch(DIGITS_SEARCH);
-        else if (text.equals(PHONE_SEARCH))
-            switchSearch(PHONE_SEARCH);
-        else if (text.equals(FORECAST_SEARCH))
-            switchSearch(FORECAST_SEARCH);
+            switchSearch(OPTIONS_SEARCH);
         else
             ((TextView) findViewById(R.id.result_text)).setText(text);
     }
@@ -196,19 +186,15 @@ public class PocketSphinxActivity extends Activity implements
      */
     @Override
     public void onEndOfSpeech() {
-        if (!recognizer.getSearchName().equals(KWS_SEARCH))
+        if (recognizer.getSearchName().equals(OPTIONS_SEARCH))
+            switchSearch(DIGITS_SEARCH);
+        else if(recognizer.getSearchName().equals(DIGITS_SEARCH))
             switchSearch(KWS_SEARCH);
     }
 
     private void switchSearch(String searchName) {
         recognizer.stop();
-
-        // If we are not spotting, start listening with timeout (10000 ms or 10 seconds).
-        if (searchName.equals(KWS_SEARCH))
-            recognizer.startListening(searchName);
-        else
-            recognizer.startListening(searchName, 10000);
-
+        recognizer.startListening(searchName);
         String caption = getResources().getString(captions.get(searchName));
         ((TextView) findViewById(R.id.caption_text)).setText(caption);
     }
@@ -234,20 +220,12 @@ public class PocketSphinxActivity extends Activity implements
         recognizer.addKeyphraseSearch(KWS_SEARCH, KEYPHRASE);
 
         // Create grammar-based search for selection between demos
-        File menuGrammar = new File(assetsDir, "menu.gram");
-        recognizer.addGrammarSearch(MENU_SEARCH, menuGrammar);
+        File optionsGrammar = new File(assetsDir, "options.gram");
+        recognizer.addGrammarSearch(OPTIONS_SEARCH, optionsGrammar);
 
         // Create grammar-based search for digit recognition
         File digitsGrammar = new File(assetsDir, "digits.gram");
         recognizer.addGrammarSearch(DIGITS_SEARCH, digitsGrammar);
-
-        // Create language model search
-        File languageModel = new File(assetsDir, "weather.dmp");
-        recognizer.addNgramSearch(FORECAST_SEARCH, languageModel);
-
-        // Phonetic search
-        File phoneticModel = new File(assetsDir, "en-phone.dmp");
-        recognizer.addAllphoneSearch(PHONE_SEARCH, phoneticModel);
     }
 
     @Override
