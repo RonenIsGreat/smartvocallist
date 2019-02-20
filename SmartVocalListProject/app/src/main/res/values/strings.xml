@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <string name="app_name">PocketSphinx Demo, Ronen was here</string>
+    
+    <string name="kws_caption">To start demonstration say \"start list\".</string>
+    <string name="options_caption">Say \"easy\", \"medium\" or \"hard\".</string>
+    <string name="digits_caption">To try recognition of digits: say something like \"one, two, three..\"</string>
+</resources>
